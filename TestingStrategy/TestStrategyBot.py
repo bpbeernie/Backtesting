@@ -66,15 +66,15 @@ class TestBot:
             
             self.folderName = dateRange[0]
             
-            start_date = dateRange[1] + datetime.timedelta(days=1)
-            end_date = dateRange[2]
+            start_date = dateRange[1]
+            end_date = dateRange[2] - datetime.timedelta(days=1)
         
             date_range = self.workdays(start_date, end_date)
             self.dateCount = len(date_range)
             
             print("Starting " + self.symbol)
             for single_date in date_range:
-                queryTime = single_date.strftime("%Y%m%d %H:%M:%S")
+                queryTime = single_date.strftime("%Y%m%d 23:59:59")
                 reqId = gb.Globals.getInstance().getOrderId()
                 self.ib.reqHistoricalData(reqId, self.contract,queryTime,"1 D",str(self.barsize)+ " min","TRADES",1,1,False,[])
                 self.reqIdList.append(reqId)
@@ -86,7 +86,6 @@ class TestBot:
             if d.isoweekday() not in excluded and d not in const.HOLIDAYS:
                 days.append(d)
             d += datetime.timedelta(days=1)
-            
         return days
 
     def on_bar_update(self, reqId, bar, realtime):
