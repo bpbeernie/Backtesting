@@ -1,4 +1,5 @@
-from TestingStrategy import TestStrategyBotBuilder
+from AMDOpenAggressiveTestingStrategy import TestStrategyBotBuilder as AMDAggressiveTestStrategyBotBuilder
+from AMDReverseTestingStrategy import TestStrategyBotBuilder as AMDReverseTestStrategyBotBuilder
 from IB import IBClient as ibClient
 import threading
 import time
@@ -32,7 +33,8 @@ def run():
     
     botList = []
 
-    botList.extend(TestStrategyBotBuilder.create_bots(ib)) 
+    #botList.extend(AMDAggressiveTestStrategyBotBuilder.create_bots(ib)) 
+    botList.extend(AMDReverseTestStrategyBotBuilder.create_bots(ib)) 
     
     ib.addBots(botList)
 

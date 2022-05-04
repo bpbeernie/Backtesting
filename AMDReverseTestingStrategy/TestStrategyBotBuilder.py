@@ -1,4 +1,5 @@
-from TestingStrategy import Constants as const, TestStrategyBot
+from AMDReverseTestingStrategy import Constants as const
+from AMDReverseTestingStrategy import TestStrategyBot
 
 def create_bots(ib):
     bots = []

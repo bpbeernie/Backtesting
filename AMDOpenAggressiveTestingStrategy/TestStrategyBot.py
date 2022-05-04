@@ -6,7 +6,7 @@ import os
 import datetime
 import threading
 import csv
-from TestingStrategy import Constants as const
+from AMDOpenAggressiveTestingStrategy import Constants as const
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
