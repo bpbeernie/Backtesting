@@ -2,12 +2,11 @@ from datetime import datetime, timedelta
 import os
 from dateutil.relativedelta import relativedelta
 import pprint
-"""
+
 STOCKS_TO_TEST = ["TWTR", "MSFT", "GM", "AAL", "AMD", "AAPL", "FB", "PFE", "UAL", "CSCO", 
                   "BAC", "DIS", "CRM", "BABA", "CMCSA", "PYPL", "ORCL", "MRK", "NVDA", "GILD", "C", 
                   "INTC", "MRVL", "MDLZ", "BA", "V", "JPM"]
-"""
-STOCKS_TO_TEST = ["AMD"]
+
 HOLIDAYS = [datetime(2022, 1, 17), datetime(2022, 2, 21), datetime(2022, 4, 15),
             datetime(2022, 6, 20),datetime(2022, 7, 4), datetime(2022, 9, 5),
             datetime(2022,11, 24),datetime(2022,12, 26)]

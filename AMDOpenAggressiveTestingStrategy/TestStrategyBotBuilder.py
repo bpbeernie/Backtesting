@@ -1,4 +1,4 @@
-from AMDOpenAggressiveTestingStrategy import Constants as const, TestStrategyBot
+from AMDOpenAggressiveTestingStrategy import Settings as const, TestStrategyBot
 
 def create_bots(ib):
     bots = []

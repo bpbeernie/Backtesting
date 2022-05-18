@@ -6,7 +6,7 @@ import os
 import datetime
 import threading
 import csv
-from AMDOpenAggressiveTestingStrategy import Constants as const
+from AMDOpenAggressiveTestingStrategy import Settings as const
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -48,6 +48,8 @@ class TestBot:
         self.shortEntryDone = False
         
         self.finalResults = {}
+        
+        self.proccessedDateRange = []
 
     def setup(self):
         self.contract = Contract()
@@ -56,7 +58,7 @@ class TestBot:
         self.contract.exchange = "SMART"
         self.contract.currency = "USD"
         self.contract.primaryExchange = "ARCA"
-        
+
         for dateRange in const.DATE_RANGE:
             TestBot.lock.acquire()
             self.reqIdList = []
@@ -78,6 +80,10 @@ class TestBot:
                 reqId = gb.Globals.getInstance().getOrderId()
                 self.ib.reqHistoricalData(reqId, self.contract,queryTime,"1 D",str(self.barsize)+ " min","TRADES",1,1,False,[])
                 self.reqIdList.append(reqId)
+            self.proccessedDateRange.append(dateRange)
+        
+    def isBotDone(self):
+        return len(self.reqIdList) == len(self.processedReqIdList) and len(self.proccessedDateRange) == len(const.DATE_RANGE)
 
 
     def workdays(self, d, end, excluded=(6, 7)):
@@ -117,46 +123,46 @@ class TestBot:
                 openBar = newBar
 
                 diff = openBar.high - openBar.low
-                adjustedHigh = openBar.high + diff * 0.2
-                adjustedLow = openBar.low - diff * 0.2
+                adjustedHigh = openBar.high + diff * 0.21
+                adjustedLow = openBar.low - diff * 0.21
                 adjustedDiff = adjustedHigh - adjustedLow
                 
-                entryLimitforLong = adjustedHigh
-                profitTargetForLong = adjustedHigh + adjustedDiff * 3
-                stopLossForLong = adjustedLow
+                entryLimitforLong = round(adjustedHigh, 2)
+                profitTargetForLong = round(adjustedHigh + adjustedDiff * 3, 2)
+                stopLossForLong = round(adjustedLow, 2)
                 
-                entryLimitforShort = adjustedLow
-                profitTargetForShort = adjustedLow - adjustedDiff * 3
-                stopLossForShort = adjustedHigh
+                entryLimitforShort = round(adjustedLow, 2)
+                profitTargetForShort = round(adjustedLow - adjustedDiff * 3, 2)
+                stopLossForShort = round(adjustedHigh, 2)
 
             else:
                 if longEntryDone and shortEntryDone:
                     return result
                 
                 if longEntryRunning and not longEntryDone:
-                    if newBar.high > profitTargetForLong:
+                    if newBar.high >= profitTargetForLong:
                         result += 3
                         return result
-                    if newBar.low < stopLossForLong:
+                    if newBar.low <= stopLossForLong:
                         shortEntryRunning = True
                         longEntryDone = True
                         result -= 1
                         
                 if shortEntryRunning and not shortEntryDone:
-                    if newBar.low < profitTargetForShort:
+                    if newBar.low <= profitTargetForShort:
                         result += 3
                         return result
                     
-                    if newBar.high > stopLossForShort:
+                    if newBar.high >= stopLossForShort:
                         longEntryRunning = True
                         shortEntryDone = True
                         result -= 1
                 
                 if not longEntryRunning and not shortEntryRunning:
-                    if newBar.high > entryLimitforLong:
+                    if newBar.high >= entryLimitforLong:
                         longEntryRunning = True
                     
-                    if newBar.low < entryLimitforShort:
+                    if newBar.low <= entryLimitforShort:
                         shortEntryRunning = True
                         
         if shortEntryRunning and not shortEntryDone:
