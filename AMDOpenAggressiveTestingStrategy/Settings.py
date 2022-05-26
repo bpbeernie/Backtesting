@@ -1,6 +1,5 @@
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
-import Globals.Strategies as strategies
 
 def monthToDate():
     currentDate = datetime.today()
@@ -56,7 +55,7 @@ HOLIDAYS.extend(HOLIDAYS_2021)
 OUTPUT_PATH = "C:/Users/bpbee/Desktop/trading/BackTesting/"
 DATE_RANGE = monthToDate()
 
-STRATEGY_LIST = strategies.strategy_list
+STRATEGY_LIST = []
 
 def print_settings():
     print("Stocks:")

@@ -1,5 +1,6 @@
 import threading
 
+
 class Globals:
     lock = threading.Lock()
 
@@ -29,3 +30,4 @@ class Globals:
         Globals.lock.release()
         
         return tempValue
+    

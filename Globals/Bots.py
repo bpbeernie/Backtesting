@@ -1,0 +1,5 @@
+from AMDOpenAggressiveTestingStrategy.TestStrategyBotBuilder import create_bots as AMDOpenAggressiveTestingStrategyCreateBot, create_bots_offline as AMDOpenAggressiveOfflineTestingStrategyCreateBot
+
+BOTS_MAPPING = {"AMDAggressiveTestStrategy": AMDOpenAggressiveTestingStrategyCreateBot}
+
+BOTS_OFFLINE_MAPPING = {"AMDAggressiveTestStrategy": AMDOpenAggressiveOfflineTestingStrategyCreateBot}

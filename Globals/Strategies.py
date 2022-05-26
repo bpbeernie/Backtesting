@@ -1,8 +1,0 @@
-from AMDOpenAggressiveTestingStrategy import TestStrategyBotBuilder as AMDAggressiveTestStrategyBotBuilder
-from AMDReverseTestingStrategy import TestStrategyBotBuilder as AMDReverseTestStrategyBotBuilder
-
-strategy_mapping = {"AMDAggressiveTestStrategy": AMDAggressiveTestStrategyBotBuilder.create_bots}
-
-strategy_list = strategy_mapping.values()
-#strategy_list.extend(AMDReverseTestStrategyBotBuilder.create_bots)
-
