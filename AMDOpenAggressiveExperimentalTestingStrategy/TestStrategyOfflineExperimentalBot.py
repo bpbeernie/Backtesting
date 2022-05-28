@@ -7,6 +7,7 @@ import datetime
 import csv
 from AMDOpenAggressiveExperimentalTestingStrategy import Settings as const
 import pickle
+import math
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -47,6 +48,7 @@ class TestBot:
         self.finalResults = {}
         
         self.proccessedDateRange = []
+        self.numStartingBars = 12
 
     def setup(self):
         self.contract = Contract()
@@ -85,7 +87,7 @@ class TestBot:
                     f.close()
                     reqIdProcessedFromCache.append(reqId)
                 else:
-                    raise ValueError("Can't process date in offline mode")
+                    raise ValueError(f"Can't process date in offline mode {self.symbol} {single_date:%Y-%m-%d}")
 
             self.proccessedDateRange.append(dateRange)
             
@@ -130,7 +132,7 @@ class TestBot:
         data = self.data[dateToProcess]
         
         for newBar in data:     
-            if len(startingBars) < 12:
+            if len(startingBars) < self.numStartingBars:
                 bar = bars.Bar()
                 bar.close = newBar.close
                 bar.high = newBar.high
@@ -146,7 +148,33 @@ class TestBot:
                 adjustedLow = low - diff * 0.21
                 adjustedDiff = adjustedHigh - adjustedLow
                 
+                quantity = math.ceil(25 / adjustedDiff)
+                
+                """
+                ============ Experimentation ==========
+                """
                 entryLimitforLong = round(adjustedHigh, 2)
+                
+                entryAmount = entryLimitforLong * quantity
+                if entryLimitforLong < 100:
+                    if entryAmount > 5500:
+                        bar = bars.Bar()
+                        bar.close = newBar.close
+                        bar.high = newBar.high
+                        bar.low = newBar.low
+                        startingBars.append(bar)
+                        self.numStartingBars = self.numStartingBars * 2
+                        continue
+                else:
+                    if entryAmount > 11000:
+                        bar = bars.Bar()
+                        bar.close = newBar.close
+                        bar.high = newBar.high
+                        bar.low = newBar.low
+                        startingBars.append(bar)
+                        self.numStartingBars = self.numStartingBars * 2
+                        continue
+                
                 profitTargetForLong = round(adjustedHigh + adjustedDiff * 3, 2)
                 stopLossForLong = round(adjustedLow, 2)
                 
