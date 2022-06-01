@@ -1,4 +1,4 @@
-from AMDOpenAggressiveTestingStrategy import Settings as settings
+from Strategies import Settings as settings
 import time
 
 

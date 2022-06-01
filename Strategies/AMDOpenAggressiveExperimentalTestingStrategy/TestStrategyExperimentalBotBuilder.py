@@ -1,4 +1,5 @@
-from AMDOpenAggressiveExperimentalTestingStrategy import Settings as const, TestStrategyOfflineExperimentalBot
+from Strategies import Settings as const
+from Strategies.AMDOpenAggressiveExperimentalTestingStrategy import TestStrategyOfflineExperimentalBot
 
 def create_bots(ib):
     bots = []

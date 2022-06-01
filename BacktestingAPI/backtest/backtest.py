@@ -1,5 +1,5 @@
 import flask
-from AMDOpenAggressiveTestingStrategy import Settings as settings
+from Strategies import Settings as settings
 from Globals.Bots import BOTS_MAPPING, BOTS_OFFLINE_MAPPING
 from IB import IBClient as ibClient
 import IB.Constants as ibConsts
@@ -9,6 +9,7 @@ from datetime import datetime
 from BacktestingAPI.services import runTestService
 import uuid
 import json
+import pprint
 
 backtest = flask.Blueprint("backtest", __name__)
 DATE_FORMAT = '%b %d %Y %I:%M%p'
@@ -91,6 +92,8 @@ def create_offline_backtest():
     settings.DATE_RANGE = date_range
     settings.STOCKS_TO_TEST = stock_list
     settings.STRATEGY_LIST = strategy_list
+    
+    pprint.pprint(settings.DATE_RANGE)
     
     taskID = str(uuid.uuid4())
     t = Thread(target=runTestService.run, args=(None,))

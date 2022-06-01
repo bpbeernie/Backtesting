@@ -4,11 +4,10 @@ from Globals import Globals as gb
 import logging
 import os
 import datetime
-import threading
 import csv
-from AMDOpenAggressiveTestingStrategy import Settings as const
+from Strategies import Settings as const
 import pickle
-from func_timeout import FunctionTimedOut, func_timeout
+import pprint
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -22,13 +21,9 @@ logger.addHandler(file_handler)
 
 #Bot Logic
 class TestBot:
-    lock = threading.Lock()
-    dateLock = threading.Lock()
     cache_path = "Cache/"
-    
-    
-    def __init__(self, ib, symbol):
-        self.ib = ib
+
+    def __init__(self, symbol):
         self.symbol = symbol
         self.reqIdList = []
         self.processedReqIdList = []
@@ -61,56 +56,48 @@ class TestBot:
         self.contract.exchange = "SMART"
         self.contract.currency = "USD"
         self.contract.primaryExchange = "ARCA"
+        
+        print("SCREAM ==============")
+        pprint.pprint(const.DATE_RANGE)
+        print("SCREAM ==============")
 
         for dateRange in const.DATE_RANGE:
-            TestBot.lock.acquire()
-            try:
-                func_timeout(420, self.testDateRange, args=(dateRange,))
-            except FunctionTimedOut:
-                print("Failed to process!")
-                TestBot.dateLock.release()
-                TestBot.lock.release()
-            #self.testDateRange(dateRange)
+            self.reqIdList = []
+            self.processedReqIdList = []
+            self.data = {}
+            self.finalResults = {}
             
+            self.folderName = dateRange[0]
             
-    def testDateRange(self, dateRange):
-        self.reqIdList = []
-        self.processedReqIdList = []
-        self.data = {}
-        self.finalResults = {}
+            start_date = dateRange[1]
+            end_date = dateRange[2] - datetime.timedelta(days=1)
         
-        self.folderName = dateRange[0]
-        
-        start_date = dateRange[1]
-        end_date = dateRange[2] - datetime.timedelta(days=1)
-    
-        date_range = self.workdays(start_date, end_date)
-        self.dateCount = len(date_range)
-        reqIdProcessedFromCache = []
-        
-        print("Starting " + self.symbol)
-        for single_date in date_range:
-            print(single_date)
-            queryTime = single_date.strftime("%Y%m%d 23:59:59")
-            reqId = gb.Globals.getInstance().getOrderId()
-            self.reqIdList.append(reqId)
+            date_range = self.workdays(start_date, end_date)
+            self.dateCount = len(date_range)
+            reqIdProcessedFromCache = []
             
-            path = f'{self.cache_path}{self.symbol}/{single_date:%Y-%m-%d}.pkl'
-            
-            if os.path.exists(path):
-                f = open(path, 'rb')
-                self.data[f'{single_date:%Y-%m-%d}'] = pickle.load(f)
-                f.close()
-                reqIdProcessedFromCache.append(reqId)
-            else:
-                TestBot.dateLock.acquire()
-                self.ib.reqHistoricalData(reqId, self.contract,queryTime,"1 D","5 secs","TRADES",1,1,False,[])
+            print("Starting " + self.symbol)
+            for single_date in date_range:
+                print(single_date)
+                reqId = gb.Globals.getInstance().getOrderId()
+                self.reqIdList.append(reqId)
+                
+                path = f'{self.cache_path}{self.symbol}/{single_date:%Y-%m-%d}.pkl'
+                
+                if os.path.exists(path):
+                    f = open(path, 'rb')
+                    self.data[f'{single_date:%Y-%m-%d}'] = pickle.load(f)
+                    f.close()
+                    reqIdProcessedFromCache.append(reqId)
+                else:
+                    raise ValueError("Can't process date in offline mode")
 
-        self.proccessedDateRange.append(dateRange)
+            self.proccessedDateRange.append(dateRange)
+            
+            if len(reqIdProcessedFromCache) > 0:
+                self.processedReqIdList.extend(reqIdProcessedFromCache)
+                self.finalize()
         
-        if len(reqIdProcessedFromCache) > 0:
-            self.processedReqIdList.extend(reqIdProcessedFromCache)
-            self.finalize()
     def isBotDone(self):
         return len(self.reqIdList) == len(self.processedReqIdList) and len(self.proccessedDateRange) == len(const.DATE_RANGE)
 
@@ -146,16 +133,6 @@ class TestBot:
         shortEntryRunning = False
         startingBars = []
         data = self.data[dateToProcess]
-        
-        path = f'{self.cache_path}{self.symbol}'
-        os.makedirs(path, exist_ok=True)
-
-        path = f'{path}/{dateToProcess}.pkl'
-        
-        if not os.path.exists(path):
-            f = open(path, "wb")
-            pickle.dump(data, f)
-            f.close()
         
         for newBar in data:     
             if len(startingBars) < 12:
@@ -227,7 +204,6 @@ class TestBot:
             return
         
         self.processedReqIdList.append(reqId)
-        TestBot.dateLock.release()
         self.finalize()
         
     def finalize(self):
@@ -238,7 +214,6 @@ class TestBot:
 
             self.printFinalResults()
             print("Ending " + self.symbol)
-            TestBot.lock.release()
         
     def printFinalResults(self):
         folder = const.OUTPUT_PATH + f'{self.folderName}/'

@@ -4,10 +4,11 @@ from Globals import Globals as gb
 import logging
 import os
 import datetime
+import threading
 import csv
-from AMDOpenAggressiveExperimentalTestingStrategy import Settings as const
+from Strategies import Settings as const
 import pickle
-import math
+from func_timeout import FunctionTimedOut, func_timeout
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -21,9 +22,13 @@ logger.addHandler(file_handler)
 
 #Bot Logic
 class TestBot:
+    lock = threading.Lock()
+    dateLock = threading.Lock()
     cache_path = "Cache/"
-
-    def __init__(self, symbol):
+    
+    
+    def __init__(self, ib, symbol):
+        self.ib = ib
         self.symbol = symbol
         self.reqIdList = []
         self.processedReqIdList = []
@@ -48,7 +53,6 @@ class TestBot:
         self.finalResults = {}
         
         self.proccessedDateRange = []
-        self.numStartingBars = 12
 
     def setup(self):
         self.contract = Contract()
@@ -59,42 +63,54 @@ class TestBot:
         self.contract.primaryExchange = "ARCA"
 
         for dateRange in const.DATE_RANGE:
-            self.reqIdList = []
-            self.processedReqIdList = []
-            self.data = {}
-            self.finalResults = {}
+            TestBot.lock.acquire()
+            try:
+                func_timeout(420, self.testDateRange, args=(dateRange,))
+            except FunctionTimedOut:
+                print("Failed to process!")
+                TestBot.dateLock.release()
+                TestBot.lock.release()
+            #self.testDateRange(dateRange)
             
-            self.folderName = dateRange[0]
             
-            start_date = dateRange[1]
-            end_date = dateRange[2] - datetime.timedelta(days=1)
+    def testDateRange(self, dateRange):
+        self.reqIdList = []
+        self.processedReqIdList = []
+        self.data = {}
+        self.finalResults = {}
         
-            date_range = self.workdays(start_date, end_date)
-            self.dateCount = len(date_range)
-            reqIdProcessedFromCache = []
+        self.folderName = dateRange[0]
+        
+        start_date = dateRange[1]
+        end_date = dateRange[2] - datetime.timedelta(days=1)
+    
+        date_range = self.workdays(start_date, end_date)
+        self.dateCount = len(date_range)
+        reqIdProcessedFromCache = []
+        
+        print("Starting " + self.symbol)
+        for single_date in date_range:
+            print(single_date)
+            queryTime = single_date.strftime("%Y%m%d 23:59:59")
+            reqId = gb.Globals.getInstance().getOrderId()
+            self.reqIdList.append(reqId)
             
-            print("Starting " + self.symbol)
-            for single_date in date_range:
-                print(single_date)
-                reqId = gb.Globals.getInstance().getOrderId()
-                self.reqIdList.append(reqId)
-                
-                path = f'{self.cache_path}{self.symbol}/{single_date:%Y-%m-%d}.pkl'
-                
-                if os.path.exists(path):
-                    f = open(path, 'rb')
-                    self.data[f'{single_date:%Y-%m-%d}'] = pickle.load(f)
-                    f.close()
-                    reqIdProcessedFromCache.append(reqId)
-                else:
-                    raise ValueError(f"Can't process date in offline mode {self.symbol} {single_date:%Y-%m-%d}")
+            path = f'{self.cache_path}{self.symbol}/{single_date:%Y-%m-%d}.pkl'
+            
+            if os.path.exists(path):
+                f = open(path, 'rb')
+                self.data[f'{single_date:%Y-%m-%d}'] = pickle.load(f)
+                f.close()
+                reqIdProcessedFromCache.append(reqId)
+            else:
+                TestBot.dateLock.acquire()
+                self.ib.reqHistoricalData(reqId, self.contract,queryTime,"1 D","5 secs","TRADES",1,1,False,[])
 
-            self.proccessedDateRange.append(dateRange)
-            
-            if len(reqIdProcessedFromCache) > 0:
-                self.processedReqIdList.extend(reqIdProcessedFromCache)
-                self.finalize()
+        self.proccessedDateRange.append(dateRange)
         
+        if len(reqIdProcessedFromCache) > 0:
+            self.processedReqIdList.extend(reqIdProcessedFromCache)
+            self.finalize()
     def isBotDone(self):
         return len(self.reqIdList) == len(self.processedReqIdList) and len(self.proccessedDateRange) == len(const.DATE_RANGE)
 
@@ -131,8 +147,18 @@ class TestBot:
         startingBars = []
         data = self.data[dateToProcess]
         
+        path = f'{self.cache_path}{self.symbol}'
+        os.makedirs(path, exist_ok=True)
+
+        path = f'{path}/{dateToProcess}.pkl'
+        
+        if not os.path.exists(path):
+            f = open(path, "wb")
+            pickle.dump(data, f)
+            f.close()
+        
         for newBar in data:     
-            if len(startingBars) < self.numStartingBars:
+            if len(startingBars) < 12:
                 bar = bars.Bar()
                 bar.close = newBar.close
                 bar.high = newBar.high
@@ -148,33 +174,7 @@ class TestBot:
                 adjustedLow = low - diff * 0.21
                 adjustedDiff = adjustedHigh - adjustedLow
                 
-                quantity = math.ceil(25 / adjustedDiff)
-                
-                """
-                ============ Experimentation ==========
-                """
                 entryLimitforLong = round(adjustedHigh, 2)
-                
-                entryAmount = entryLimitforLong * quantity
-                if entryLimitforLong < 100:
-                    if entryAmount > 5500:
-                        bar = bars.Bar()
-                        bar.close = newBar.close
-                        bar.high = newBar.high
-                        bar.low = newBar.low
-                        startingBars.append(bar)
-                        self.numStartingBars = self.numStartingBars * 2
-                        continue
-                else:
-                    if entryAmount > 11000:
-                        bar = bars.Bar()
-                        bar.close = newBar.close
-                        bar.high = newBar.high
-                        bar.low = newBar.low
-                        startingBars.append(bar)
-                        self.numStartingBars = self.numStartingBars * 2
-                        continue
-                
                 profitTargetForLong = round(adjustedHigh + adjustedDiff * 3, 2)
                 stopLossForLong = round(adjustedLow, 2)
                 
@@ -227,6 +227,7 @@ class TestBot:
             return
         
         self.processedReqIdList.append(reqId)
+        TestBot.dateLock.release()
         self.finalize()
         
     def finalize(self):
@@ -237,6 +238,7 @@ class TestBot:
 
             self.printFinalResults()
             print("Ending " + self.symbol)
+            TestBot.lock.release()
         
     def printFinalResults(self):
         folder = const.OUTPUT_PATH + f'{self.folderName}/'

@@ -5,8 +5,9 @@ import logging
 import os
 import datetime
 import csv
-from AMDOpenAggressiveTestingStrategy import Settings as const
+from Strategies import Settings as const
 import pickle
+import math
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -85,7 +86,7 @@ class TestBot:
                     f.close()
                     reqIdProcessedFromCache.append(reqId)
                 else:
-                    raise ValueError("Can't process date in offline mode")
+                    raise ValueError(f"Can't process date in offline mode {self.symbol} {single_date:%Y-%m-%d}")
 
             self.proccessedDateRange.append(dateRange)
             
@@ -120,6 +121,15 @@ class TestBot:
         
         self.data.setdefault(dateString, []).append(newBar) 
         
+    def processBar(self, newBar):
+        bar = bars.Bar()
+        bar.close = newBar.close
+        bar.high = newBar.high
+        bar.low = newBar.low
+        
+        return bar
+
+    
     def proccessDate(self, dateToProcess):
         result = 0
         longEntryDone = False
@@ -128,9 +138,10 @@ class TestBot:
         shortEntryRunning = False
         startingBars = []
         data = self.data[dateToProcess]
+        numStartingBars = 12
         
         for newBar in data:     
-            if len(startingBars) < 12:
+            if len(startingBars) < numStartingBars:
                 bar = bars.Bar()
                 bar.close = newBar.close
                 bar.high = newBar.high
@@ -146,7 +157,36 @@ class TestBot:
                 adjustedLow = low - diff * 0.21
                 adjustedDiff = adjustedHigh - adjustedLow
                 
+                
                 entryLimitforLong = round(adjustedHigh, 2)
+                """
+                ============ Experimentation ==========
+                """
+                if adjustedDiff == 0:
+                    bar = bars.Bar()
+                    bar.close = newBar.close
+                    bar.high = newBar.high
+                    bar.low = newBar.low
+                    startingBars.append(bar)
+                    numStartingBars = numStartingBars * 2
+                    continue
+                
+                quantity = math.ceil(25 / adjustedDiff)
+
+                entryAmount = entryLimitforLong * quantity
+                
+
+                if entryAmount > 20000:
+                    startingBars.append(self.processBar(newBar))
+                    numStartingBars = numStartingBars * 2
+                    
+                    print(f'{self.symbol} - date:{dateToProcess} q:{quantity} entry:{entryLimitforLong} diff:{adjustedDiff} amount:{entryAmount}')
+                    continue
+
+                """
+                ============ Experimentation ==========
+                """
+                
                 profitTargetForLong = round(adjustedHigh + adjustedDiff * 3, 2)
                 stopLossForLong = round(adjustedLow, 2)
                 

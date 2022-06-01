@@ -1,6 +1,6 @@
 import flask
-from Globals.Bots import BOTS_MAPPING
-from AMDOpenAggressiveTestingStrategy import Settings as settings
+from Globals.Bots import BOTS_MAPPING, STOCKS
+from Strategies import Settings as settings
 
 template = flask.Blueprint("template", __name__)
 
@@ -19,7 +19,7 @@ def get_backtest_template():
     date_range = settings.monthToDate()
     strategy_list = BOTS_MAPPING.keys()
     
-    return create_backtest_response(date_range, settings.STOCKS_TO_TEST, strategy_list)
+    return create_backtest_response(date_range, STOCKS, strategy_list)
 
 @template.route('/<year>', methods=['GET'])
 def get_backtest_template_by_year(year):
@@ -27,4 +27,4 @@ def get_backtest_template_by_year(year):
     strategy_list = BOTS_MAPPING.keys()
     print(strategy_list)
     
-    return create_backtest_response(date_range, settings.STOCKS_TO_TEST, strategy_list)
+    return create_backtest_response(date_range, STOCKS, strategy_list)
