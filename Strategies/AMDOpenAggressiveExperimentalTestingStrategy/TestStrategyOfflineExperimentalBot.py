@@ -168,7 +168,7 @@ class TestBot:
                     bar.high = newBar.high
                     bar.low = newBar.low
                     startingBars.append(bar)
-                    numStartingBars = numStartingBars * 2
+                    numStartingBars = numStartingBars +12
                     continue
                 
                 quantity = math.ceil(25 / adjustedDiff)
@@ -178,7 +178,7 @@ class TestBot:
 
                 if entryAmount > 20000:
                     startingBars.append(self.processBar(newBar))
-                    numStartingBars = numStartingBars * 2
+                    numStartingBars = numStartingBars +12
                     
                     print(f'{self.symbol} - date:{dateToProcess} q:{quantity} entry:{entryLimitforLong} diff:{adjustedDiff} amount:{entryAmount}')
                     continue
