@@ -63,7 +63,12 @@ class TestBot:
         self.contract.secType = "STK"
         self.contract.exchange = "SMART"
         self.contract.currency = "USD"
-        self.contract.primaryExchange = "ARCA"
+        
+        if self.contract.symbol == "META":
+            print("Update primary exchange for META")
+            self.contract.primaryExchange = "NASDAQ"
+        else:
+            self.contract.primaryExchange = "ARCA"
 
         for dateRange in const.DATE_RANGE:
             TestBot.lock.acquire()
@@ -99,6 +104,9 @@ class TestBot:
             self.reqIdList.append(reqId)
             
             path = f'{self.cache_path}{self.symbol}/{single_date:%Y-%m-%d}.pkl'
+            
+            if self.symbol == "META" and single_date < datetime.datetime(2022, 6, 9):
+                path = f'{self.cache_path}FB/{single_date:%Y-%m-%d}.pkl'
             
             if os.path.exists(path):
                 f = open(path, 'rb')

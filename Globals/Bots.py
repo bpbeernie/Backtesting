@@ -9,6 +9,6 @@ BOTS_MAPPING = {"AMDAggressiveTestStrategy": AMDOpenAggressiveTestingStrategyCre
 BOTS_OFFLINE_MAPPING = {"AMDAggressiveTestStrategy": AMDOpenAggressiveOfflineTestingStrategyCreateBot,
                         "ExperimentalBotStrategy": AMDExperiment}
 
-STOCKS = ["TWTR", "MSFT", "GM", "AAL", "AMD", "AAPL", "FB", "PFE", "UAL", "CSCO", 
+STOCKS = ["TWTR", "MSFT", "GM", "AAL", "AMD", "AAPL", "META", "PFE", "UAL", "CSCO", 
                   "BAC", "DIS", "CRM", "BABA", "CMCSA", "PYPL", "ORCL", "NVDA", "GILD", "C", 
                   "INTC", "MRVL", "MDLZ", "BA", "V", "JPM"]
