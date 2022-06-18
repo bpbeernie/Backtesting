@@ -1,7 +1,6 @@
 from ibapi.client import EClient
 from ibapi.wrapper import EWrapper
 from Globals import Globals as gb
-from Helpers import Orders as ord
 
 #Class for Interactive Brokers Connection
 class IBApi(EWrapper,EClient):
@@ -63,19 +62,3 @@ class IBApi(EWrapper,EClient):
         print(errorCode)
         print(errorMsg)
         
-    def updatePortfolio(self, contract, position,
-                    marketPrice, marketValue,averageCost, unrealizedPNL, realizedPNL, accountName):
-        
-        super().updatePortfolio(contract, position, marketPrice,
-                                marketValue,averageCost, unrealizedPNL,
-                                realizedPNL, accountName)
-        
-        print("Received Portfolio Update: " + contract.symbol + " : " + str(position))
-        
-        if position != 0 and contract.symbol not in self.closedPositions:
-            print("Closing position for: " + contract.symbol)
-            self.closedPositions.append(contract.symbol)
-            gb.Globals.getInstance().orderResponses = {}
-            closingContract, closingOrder = ord.closingOrder(contract.symbol, gb.Globals.getInstance().getOrderId(), position)
-            self.placeOrder(closingOrder.orderId, closingContract, closingOrder)
-

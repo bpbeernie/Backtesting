@@ -1,10 +1,8 @@
-from Strategies.AMDOpenAggressiveTestingStrategy.TestStrategyBotBuilder import create_bots as AMDOpenAggressiveTestingStrategyCreateBot, create_bots_offline as AMDOpenAggressiveOfflineTestingStrategyCreateBot
+from Strategies.AMDOpenAggressiveTestingStrategy.TestStrategyBotBuilder import create_bots_offline as AMDOpenAggressiveOfflineTestingStrategyCreateBot
 from Strategies.AMDOpenAggressiveExperimentalTestingStrategy.TestStrategyExperimentalBotBuilder import create_bots_offline as AMDExperiment
 from Strategies.AMDOpenAggressiveTestingStrategy.TestStrategyBotBuilderV2 import create_bots as AMDOpenAggressiveTestingStrategyCreateBotV2
 
-BOTS_MAPPING = {"AMDAggressiveTestStrategy": AMDOpenAggressiveTestingStrategyCreateBot,
-                "ExperimentalBotStrategy": AMDExperiment,
-                "AMDOpenAggressiveTestingStrategyCreateBotV2": AMDOpenAggressiveTestingStrategyCreateBotV2}
+BOTS_MAPPING = {"AMDOpenAggressiveTestingStrategyCreateBotV2": AMDOpenAggressiveTestingStrategyCreateBotV2}
 
 BOTS_OFFLINE_MAPPING = {"AMDAggressiveTestStrategy": AMDOpenAggressiveOfflineTestingStrategyCreateBot,
                         "ExperimentalBotStrategy": AMDExperiment}
