@@ -1,5 +1,5 @@
 from Strategies import Settings as const
-from Strategies.AMDOpenAggressiveTestingStrategy import TestStrategyBotV2, TestStrategyOfflineBot
+from Strategies.AMDOpenAggressiveTestingStrategy import TestStrategyBotV2
 
 def create_bots(ib):
     bots = []
@@ -13,6 +13,6 @@ def create_bots_offline():
     bots = []
     
     for stock in const.STOCKS_TO_TEST:
-        bots.append(TestStrategyOfflineBot.TestBot(stock))
+        bots.append(TestStrategyBotV2.TestBot(None, stock))
         
     return bots
