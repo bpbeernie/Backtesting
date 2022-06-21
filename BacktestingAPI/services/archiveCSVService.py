@@ -1,7 +1,7 @@
 import os
 import glob
 from datetime import date
-from BacktestingAPI.services.constants import PATH
+from Globals.Constants import PATH
 
 def archive():
     today = date.today()

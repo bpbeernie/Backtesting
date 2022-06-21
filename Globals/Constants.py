@@ -9,3 +9,10 @@ HOLIDAYS = [datetime(2022, 1, 17), datetime(2022, 2, 21), datetime(2022, 4, 15),
             datetime(2022,11, 24),datetime(2022,12, 26)]
 
 HOLIDAYS.extend(HOLIDAYS_2021)
+
+STOCKS = ["TWTR", "MSFT", "GM", "AAL", "AMD", "AAPL", "META", "PFE", "UAL", "CSCO", 
+                  "BAC", "DIS", "CRM", "BABA", "CMCSA", "PYPL", "ORCL", "NVDA", "GILD", "C", 
+                  "INTC", "MRVL", "MDLZ", "BA", "V", "JPM"]
+
+PATH = "C:/Users/bpbee/Desktop/trading/BackTesting/"
+RISK = 25

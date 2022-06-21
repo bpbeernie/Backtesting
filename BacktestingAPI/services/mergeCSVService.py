@@ -5,7 +5,7 @@ from xlsxwriter.workbook import Workbook
 from datetime import date
 import string
 import math
-from BacktestingAPI.services.constants import PATH, RISK
+from Globals.Constants import PATH, RISK
 
 
 def convertIndexToXLRow(index):
