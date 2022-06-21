@@ -7,3 +7,4 @@ BOTS_OFFLINE_MAPPING = {"AMDOpenAggressiveTestingStrategyCreateBotV2": AMDOpenAg
 STOCKS = ["TWTR", "MSFT", "GM", "AAL", "AMD", "AAPL", "META", "PFE", "UAL", "CSCO", 
                   "BAC", "DIS", "CRM", "BABA", "CMCSA", "PYPL", "ORCL", "NVDA", "GILD", "C", 
                   "INTC", "MRVL", "MDLZ", "BA", "V", "JPM"]
+

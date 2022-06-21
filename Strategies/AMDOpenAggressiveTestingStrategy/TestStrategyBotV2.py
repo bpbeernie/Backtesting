@@ -1,11 +1,11 @@
 from ibapi.contract import Contract
 from Helpers import Bars as bars
-from Globals import Globals as gb
+from Globals import Globals as gb, Constants as const
+import settings
 import os
 import datetime
 import threading
 import csv
-from Strategies import Settings as const
 import pickle
 from func_timeout import FunctionTimedOut, func_timeout
 import math
@@ -57,7 +57,7 @@ class TestBot:
         else:
             self.contract.primaryExchange = "ARCA"
 
-        for dateRange in const.DATE_RANGE:
+        for dateRange in settings.DATE_RANGE:
             TestBot.lock.acquire()
             try:
                 func_timeout(420, self.testDateRange, args=(dateRange,))
@@ -113,7 +113,7 @@ class TestBot:
             self.processedReqIdList.extend(reqIdProcessedFromCache)
             self.finalize()
     def isBotDone(self):
-        return len(self.reqIdList) == len(self.processedReqIdList) and len(self.proccessedDateRange) == len(const.DATE_RANGE)
+        return len(self.reqIdList) == len(self.processedReqIdList) and len(self.proccessedDateRange) == len(settings.DATE_RANGE)
 
 
     def workdays(self, d, end, excluded=(6, 7)):
@@ -316,7 +316,7 @@ class TestBot:
             TestBot.lock.release()
         
     def printFinalResults(self):
-        folder = const.OUTPUT_PATH + f'{self.folderName}/'
+        folder = settings.OUTPUT_PATH + f'{self.folderName}/'
         if not os.path.exists(folder):
             os.makedirs(folder)
             

@@ -1,5 +1,5 @@
 import flask
-from Strategies import Settings as settings
+import settings
 from Globals.Bots import BOTS_MAPPING, BOTS_OFFLINE_MAPPING
 from IB import IBClient as ibClient
 import IB.Constants as ibConsts

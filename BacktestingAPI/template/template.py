@@ -1,6 +1,6 @@
 import flask
 from Globals.Bots import BOTS_MAPPING, STOCKS
-from Strategies import Settings as settings
+import settings
 
 template = flask.Blueprint("template", __name__)
 

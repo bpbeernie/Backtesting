@@ -1,4 +1,4 @@
-from Strategies import Settings as settings
+import settings
 import time
 
 def run(ib):
