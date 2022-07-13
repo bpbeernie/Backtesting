@@ -15,7 +15,7 @@ def stringfy_date_range(date_range):
     
     return string_date_range
 
-@template.route('/', methods=['GET'])
+@template.route('', methods=['GET'])
 def get_backtest_template():
     date_range = settings.monthToDate()
     strategy_list = BOTS_MAPPING.keys()
