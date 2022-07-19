@@ -1,11 +1,11 @@
 from ibapi.contract import Contract
 from Helpers import Bars as bars
-from Globals import Globals as gb
+from Globals import Globals as gb, Constants as const
 import logging
 import os
 import datetime
 import csv
-from Strategies import Settings as const
+import settings
 import pickle
 import math
 
@@ -57,7 +57,7 @@ class TestBot:
         self.contract.currency = "USD"
         self.contract.primaryExchange = "ARCA"
 
-        for dateRange in const.DATE_RANGE:
+        for dateRange in settings.DATE_RANGE:
             self.reqIdList = []
             self.processedReqIdList = []
             self.data = {}
@@ -95,7 +95,7 @@ class TestBot:
                 self.finalize()
         
     def isBotDone(self):
-        return len(self.reqIdList) == len(self.processedReqIdList) and len(self.proccessedDateRange) == len(const.DATE_RANGE)
+        return len(self.reqIdList) == len(self.processedReqIdList) and len(self.proccessedDateRange) == len(settings.DATE_RANGE)
 
 
     def workdays(self, d, end, excluded=(6, 7)):
@@ -251,7 +251,7 @@ class TestBot:
             print("Ending " + self.symbol)
         
     def printFinalResults(self):
-        folder = const.OUTPUT_PATH + f'{self.folderName}/'
+        folder = settings.OUTPUT_PATH + f'{self.folderName}/'
         if not os.path.exists(folder):
             os.makedirs(folder)
             
