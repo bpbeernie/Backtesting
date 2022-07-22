@@ -1,5 +1,5 @@
 from ibapi.contract import Contract
-from Helpers import Bars as bars
+from Helpers import Bars as bars, Result as Res
 from Globals import Globals as gb, Constants as const
 import settings
 import os
@@ -9,6 +9,7 @@ import csv
 import pickle
 from func_timeout import FunctionTimedOut, func_timeout
 import math
+
 
 #Bot Logic
 class TestBot:
@@ -155,7 +156,8 @@ class TestBot:
     def proccessDate(self, dateToProcess):
         print(f"==================={dateToProcess}===================")
         
-        result = 0
+        result = Res.Result()
+        quantity = 0
         longEntryDone = False
         shortEntryDone = False
         longEntryRunning = False
@@ -207,11 +209,11 @@ class TestBot:
                     numStartingBars = numStartingBars +12
                     continue
                 
-                quantity = math.ceil(25 / adjustedDiff)
+                quantity = math.ceil(settings.CASH_RISK / adjustedDiff)
 
                 entryAmount = entryLimitforLong * quantity
             
-                if entryAmount > 20000:
+                if entryAmount > settings.MAX_AMOUNT:
                     startingBars.append(self.processBar(newBar))
                     numStartingBars = numStartingBars +12
                     
@@ -251,24 +253,24 @@ class TestBot:
                 if longEntryTriggered and not longEntryDone:
                     if newBar.high >= profitTargetForLong:
                         if longEntryRunning:
-                            result += 3 * self.calculateGainOrLoss(profitTargetForLong, entryLimitforLong, actualLongEntry)
+                            result.finalAmount += 3 * self.calculateGainOrLoss(profitTargetForLong, entryLimitforLong, actualLongEntry)
                         return result
                     if newBar.low <= stopLossForLong:
                         shortEntryTriggered = True
                         longEntryDone = True
-                        result -= 1 * self.calculateGainOrLoss(stopLossForLong, entryLimitforLong, actualLongEntry)
+                        result.finalAmount -= 1 * self.calculateGainOrLoss(stopLossForLong, entryLimitforLong, actualLongEntry)
                         continue
                         
                 if shortEntryTriggered and not shortEntryDone:
                     if newBar.low <= profitTargetForShort:
                         if shortEntryRunning:
-                            result += 3* self.calculateGainOrLoss(profitTargetForShort, entryLimitforShort, actualShortEntry)
+                            result.finalAmount += 3* self.calculateGainOrLoss(profitTargetForShort, entryLimitforShort, actualShortEntry)
                         return result
                     
                     if newBar.high >= stopLossForShort:
                         longEntryTriggered = True
                         shortEntryDone = True
-                        result -= 1* self.calculateGainOrLoss(stopLossForShort, entryLimitforShort, actualShortEntry)
+                        result.finalAmount -= 1* self.calculateGainOrLoss(stopLossForShort, entryLimitforShort, actualShortEntry)
                         continue
                 
 
@@ -288,11 +290,11 @@ class TestBot:
                 
         if shortEntryRunning and not shortEntryDone:
             remaining =  (actualShortEntry - data[-1].close) / (actualShortEntry - profitTargetForShort)
-            result += remaining * 3
+            result.finalAmount += remaining * 3
             
         if longEntryRunning and not longEntryDone:
             remaining = (data[-1].close - actualLongEntry) /  (profitTargetForLong - actualLongEntry)
-            result += remaining * 3
+            result.finalAmount += remaining * 3
             
         return result
         
@@ -326,8 +328,9 @@ class TestBot:
         
             keys = sorted(self.finalResults.keys())
             for key in keys:
-                value = self.finalResults[key]
+                result = self.finalResults[key]
                 date = key.strftime("%Y-%m-%d")
+                value = result.finalAmount
                 if value < 0:
                     writer.writerow([date, None, abs(value)])
                 else:

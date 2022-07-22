@@ -5,7 +5,7 @@ from xlsxwriter.workbook import Workbook
 from datetime import date
 import string
 import math
-from Globals.Constants import PATH, RISK
+from Globals.Constants import PATH, CASHRISK
 
 
 def convertIndexToXLRow(index):
@@ -44,7 +44,7 @@ def mergeCSV():
                         except ValueError:
                             worksheet.write(r, c, col)
                     if r != 0:
-                        worksheet.write_formula(r, 3, f'=(B{convertIndexToXLRow(r)} -C{convertIndexToXLRow(r)})*{RISK}')
+                        worksheet.write_formula(r, 3, f'=(B{convertIndexToXLRow(r)} -C{convertIndexToXLRow(r)})*{CASHRISK}')
                         worksheet.write_formula(r, 4, f'=SUM(D2:D{convertIndexToXLRow(r)})')
             summaryWorksheet.write_formula(summaryRow, 0, f'=HYPERLINK("#{stock}!H5", "{stock}")')
             summaryWorksheet.write_formula(summaryRow, 1, f'={stock}!H5')

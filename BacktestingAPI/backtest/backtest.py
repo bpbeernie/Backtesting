@@ -69,10 +69,14 @@ def create_backtest():
     date_range = parse_date_range(flask.request.json['DateRange'])
     stock_list = flask.request.json['Stocks']
     strategy_list = parse_strategy_list(flask.request.json['Strategies'])
+    cash_risk = float(flask.request.json['CashRisk'])
+    max_amount = float(flask.request.json['MaxBidAmount'])
 
     settings.DATE_RANGE = date_range
     settings.STOCKS_TO_TEST = stock_list
     settings.STRATEGY_LIST = strategy_list
+    settings.CASH_RISK = cash_risk
+    settings.MAX_AMOUNT = max_amount
     
     taskID = str(uuid.uuid4())
     t = Thread(target=runTestService.run, args=(ib,))

@@ -15,4 +15,5 @@ STOCKS = ["TWTR", "MSFT", "GM", "AAL", "AMD", "AAPL", "META", "PFE", "UAL", "CSC
                   "INTC", "MRVL", "MDLZ", "BA", "V", "JPM"]
 
 PATH = "C:/Users/bpbee/Desktop/trading/BackTesting/"
-RISK = 25
+CASHRISK = 42.10
+MAX_AMOUNT = 33684

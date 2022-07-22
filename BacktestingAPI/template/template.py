@@ -5,8 +5,9 @@ from Globals import Constants as consts
 
 template = flask.Blueprint("template", __name__)
 
-def create_backtest_response(date_range, stock_list, strategy_list):
-    return {"DateRange": stringfy_date_range(date_range), "Stocks": stock_list, "Strategies": list(strategy_list)}
+def create_backtest_response(date_range, stock_list, strategy_list, cash_risk, max_amount):
+    return {"DateRange": stringfy_date_range(date_range), "Stocks": stock_list, "Strategies": list(strategy_list), 
+            "CashRisk": cash_risk, "MaxBidAmount":max_amount}
 
 def stringfy_date_range(date_range):
     string_date_range = []
@@ -20,7 +21,7 @@ def get_backtest_template():
     date_range = settings.monthToDate()
     strategy_list = BOTS_MAPPING.keys()
     
-    return create_backtest_response(date_range, consts.STOCKS, strategy_list)
+    return create_backtest_response(date_range, consts.STOCKS, strategy_list, consts.CASHRISK, consts.MAX_AMOUNT)
 
 @template.route('/<year>', methods=['GET'])
 def get_backtest_template_by_year(year):
@@ -28,4 +29,4 @@ def get_backtest_template_by_year(year):
     strategy_list = BOTS_MAPPING.keys()
     print(strategy_list)
     
-    return create_backtest_response(date_range, consts.STOCKS, strategy_list)
+    return create_backtest_response(date_range, consts.STOCKS, strategy_list, consts.CASHRISK, consts.MAX_AMOUNT)

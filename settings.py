@@ -40,6 +40,9 @@ DATE_RANGE = []
 
 STRATEGY_LIST = []
 
+CASH_RISK = 0
+MAX_AMOUNT = 0
+
 def print_settings():
     print("Stocks:")
     print(STOCKS_TO_TEST)
